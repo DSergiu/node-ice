@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "check": "grunt default"
+    "example": "ts-node src/example.ts"
   },
   "main": "dist/IceKey.js",
   "private": false,
@@ -23,6 +23,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "ts-node": "^3.1.0",
     "typescript": "^2.3.2"
   },
   "keywords": [
