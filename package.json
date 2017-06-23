@@ -1,0 +1,34 @@
+{
+  "name": "node-ice",
+  "description": "NodeJS Information Concealment Engine (ICE) algorithm",
+  "version": "1.0.0",
+  "homepage": "https://github.com/DSergiu/node-ice",
+  "author": {
+    "name": "Danalachi Sergiu",
+    "url": "https://github.com/DSergiu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DSergiu/node-ice.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "check": "grunt default"
+  },
+  "main": "dist/IceKey.js",
+  "private": false,
+  "engines": {
+    "node": ">=6.9.0 <7.0.0"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "typescript": "^2.3.2"
+  },
+  "keywords": [
+    "security",
+    "ICE",
+    "Information Concealment Engine"
+  ]
+}
