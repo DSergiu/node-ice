@@ -35,8 +35,6 @@ Unlike DES, ICE has various levels of encryption, where higher levels provide mo
 
 Once an IceKey object has been created, it will usually have its key set from a password of some sort. The object can then be used to encrypt and decrypt data using that key.
 
----
-
 ## Constructors
 
 ### IceKey
@@ -49,8 +47,6 @@ Level 0 uses the Thin-ICE variant of ICE, which is an 8-round cipher taking an 8
 * **Parameters:**
 	*   level - the ICE level of encryption
 	
----
-
 ## Methods
 
 ### set
