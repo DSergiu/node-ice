@@ -1,7 +1,7 @@
 {
   "name": "node-ice",
   "description": "NodeJS Information Concealment Engine (ICE) algorithm",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "homepage": "https://github.com/DSergiu/node-ice",
   "author": {
     "name": "Danalachi Sergiu",
@@ -23,12 +23,15 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/node": "^8.0.9",
     "ts-node": "^3.1.0",
     "typescript": "^2.3.2"
   },
   "keywords": [
-    "security",
+    "Information Concealment Engine",
     "ICE",
-    "Information Concealment Engine"
+    "decrypt",
+    "entsccrypt",
+    "security"
   ]
 }

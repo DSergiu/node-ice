@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class IceKey {
     // Create a new ICE key with the specified level.
     constructor(level) {
+        this.cipherHolder = new Uint8Array(8);
+        this.plainHolder = new Uint8Array(8);
         if (!IceKey.spBoxInitialised) {
             this.spBoxInit();
             IceKey.spBoxInitialised = true;
@@ -84,6 +86,14 @@ class IceKey {
             IceKey.spBox[3][i] = this.perm32(x);
         }
     }
+    // Return the key size, in bytes.
+    keySize() {
+        return (this.size * 8);
+    }
+    // Return the block size, in bytes.
+    blockSize() {
+        return (8);
+    }
     // Set 8 rounds [n, n+7] of the key schedule of an ICE key.
     scheduleBuild(kb, n, krot_idx) {
         let i;
@@ -107,48 +117,38 @@ class IceKey {
     }
     // Set the key schedule of an ICE key.
     set(key) {
-        let kb = [];
-        for (let i = 0; i < 4; i++) {
+        let kb = new Uint16Array(4);
+        for (let i = 0; i < 4; i++)
             kb[i] = 0;
-        }
         if (this.rounds == 8) {
             for (let i = 0; i < 4; i++)
-                kb[3 - i] = ((key[i * 2] & 0xff) << 8)
-                    | (key[i * 2 + 1] & 0xff);
+                kb[3 - i] = ((key[i * 2] & 0xff) << 8) | (key[i * 2 + 1] & 0xff);
             this.scheduleBuild(kb, 0, 0);
             return;
         }
         for (let i = 0; i < this.size; i++) {
-            let j;
-            for (j = 0; j < 4; j++)
-                kb[3 - j] = ((key[i * 8 + j * 2] & 0xff) << 8)
-                    | (key[i * 8 + j * 2 + 1] & 0xff);
+            for (let j = 0; j < 4; j++)
+                kb[3 - j] = ((key[i * 8 + j * 2] & 0xff) << 8) | (key[i * 8 + j * 2 + 1] & 0xff);
             this.scheduleBuild(kb, i * 8, 0);
             this.scheduleBuild(kb, this.rounds - 8 - i * 8, 8);
         }
     }
     // Clear the key schedule to prevent memory snooping.
     clear() {
-        let i, j;
-        for (i = 0; i < this.rounds; i++)
-            for (j = 0; j < 3; j++)
+        for (let i = 0; i < this.rounds; i++)
+            for (let j = 0; j < 3; j++)
                 this.keySchedule[i][j] = 0;
     }
     // The single round ICE f function.
     roundFunc(p, subkey) {
-        let tl, tr;
-        let al, ar;
-        tl = ((p >>> 16) & 0x3ff) | (((p >>> 14) | (p << 18)) & 0xffc00);
-        tr = (p & 0x3ff) | ((p << 2) & 0xffc00);
-        // al = (tr & subkey[2]) | (tl & ~subkey[2]);
-        // ar = (tl & subkey[2]) | (tr & ~subkey[2]);
-        al = subkey[2] & (tl ^ tr);
-        ar = al ^ tr;
+        let tl = ((p >>> 16) & 0x3ff) | (((p >>> 14) | (p << 18)) & 0xffc00);
+        let tr = (p & 0x3ff) | ((p << 2) & 0xffc00);
+        let al = subkey[2] & (tl ^ tr);
+        let ar = al ^ tr;
         al ^= tl;
         al ^= subkey[0];
         ar ^= subkey[1];
-        return (IceKey.spBox[0][al >>> 10] | IceKey.spBox[1][al & 0x3ff]
-            | IceKey.spBox[2][ar >>> 10] | IceKey.spBox[3][ar & 0x3ff]);
+        return (IceKey.spBox[0][al >>> 10] | IceKey.spBox[1][al & 0x3ff] | IceKey.spBox[2][ar >>> 10] | IceKey.spBox[3][ar & 0x3ff]);
     }
     // Encrypt a block of 8 bytes of data.
     encrypt(plaintext, ciphertext) {
@@ -172,7 +172,8 @@ class IceKey {
     // Decrypt a block of 8 bytes of data.
     decrypt(ciphertext, plaintext) {
         let i;
-        let l = 0, r = 0;
+        let l = 0;
+        let r = 0;
         for (i = 0; i < 4; i++) {
             l |= (ciphertext[i] & 0xff) << (24 - i * 8);
             r |= (ciphertext[i + 4] & 0xff) << (24 - i * 8);
@@ -188,13 +189,28 @@ class IceKey {
             l >>>= 8;
         }
     }
-    // Return the key size, in bytes.
-    keySize() {
-        return (this.size * 8);
-    }
-    // Return the block size, in bytes.
-    blockSize() {
-        return (8);
+    decryptUint8Array(cipherArray, plainArray, from, to) {
+        from = from | 0;
+        to = to | cipherArray.length;
+        let k = 0;
+        // decrypt full blocks
+        while (from + 8 <= to) {
+            for (let i = 0; i < 8; i++) {
+                this.cipherHolder[i] = cipherArray[from + i];
+            }
+            this.decrypt(this.cipherHolder, this.plainHolder);
+            for (let i = 0; i < 8; i++) {
+                plainArray[k + i] = this.plainHolder[i];
+            }
+            k += 8;
+            from += 8;
+        }
+        // remaining bytes do not get encryption, just copy them
+        if (((from - to) & 0x7) != 0) {
+            for (let i = from - to - 1; i >= 0; i--) {
+                plainArray[k + i] = cipherArray[i];
+            }
+        }
     }
 }
 IceKey.spBoxInitialised = false;

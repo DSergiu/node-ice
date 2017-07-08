@@ -1,28 +1,15 @@
 import {IceKey} from './IceKey';
 
 const iceKey = new IceKey(1);
-const key = string2Bin('e8MTuLq3');
-iceKey.set(key);
+iceKey.set(new Uint8Array([0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89]));
 
-const toEncrypt = string2Bin('ananas12');
+const toEncrypt = new Uint8Array([0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88]);
+const encrypted = new Uint8Array(8);
+const decrypted = new Uint8Array(8);
 
-const encrypted = [];
 iceKey.encrypt(toEncrypt, encrypted);
-
-const decrypted = [];
 iceKey.decrypt(encrypted, decrypted);
 
-console.log(bin2String(decrypted));
-
-
-function string2Bin(str) {
-  const result = [];
-  for (let i = 0; i < str.length; i++) {
-    result.push(str.charCodeAt(i));
-  }
-  return result;
-}
-
-function bin2String(array) {
-  return String.fromCharCode.apply(String, array);
-}
+console.log(`To encrypt: ${toEncrypt}`);
+console.log(`Encrypted: ${encrypted}`);
+console.log(`Decrypted: ${decrypted}`);
