@@ -190,8 +190,10 @@ class IceKey {
         }
     }
     decryptUint8Array(cipherArray, plainArray, from, to) {
-        from = from | 0;
-        to = to | cipherArray.length;
+        if (from == null)
+            from = 0;
+        if (to == null)
+            to = cipherArray.length;
         let k = 0;
         // decrypt full blocks
         while (from + 8 <= to) {
@@ -206,9 +208,9 @@ class IceKey {
             from += 8;
         }
         // remaining bytes do not get encryption, just copy them
-        if (((from - to) & 0x7) != 0) {
-            for (let i = from - to - 1; i >= 0; i--) {
-                plainArray[k + i] = cipherArray[i];
+        if (((to - from) & 0x7) != 0) {
+            for (let i = from; i < to; i++) {
+                plainArray[k++] = cipherArray[i];
             }
         }
     }
@@ -241,3 +243,4 @@ IceKey.keyrot = [
     1, 3, 2, 0, 3, 1, 0, 2
 ];
 exports.IceKey = IceKey;
+//# sourceMappingURL=IceKey.js.map

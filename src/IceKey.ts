@@ -268,8 +268,8 @@ export class IceKey {
   private plainHolder = new Uint8Array(8);
 
   public decryptUint8Array(cipherArray: Uint8Array, plainArray: Uint8Array, from?: number, to?: number) {
-    from = from | 0;
-    to = to | cipherArray.length;
+    if (from == null) from = 0;
+    if (to == null) to = cipherArray.length;
 
     let k = 0;
 
@@ -290,9 +290,9 @@ export class IceKey {
     }
 
     // remaining bytes do not get encryption, just copy them
-    if (((from - to) & 0x7) != 0) {
-      for (let i = from - to - 1; i >= 0; i--) {
-        plainArray[k + i] = cipherArray[i];
+    if (((to - from) & 0x7) != 0) {
+      for (let i = from; i < to; i++) {
+        plainArray[k++] = cipherArray[i];
       }
     }
   }
